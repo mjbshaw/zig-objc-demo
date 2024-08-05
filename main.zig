@@ -3,6 +3,7 @@ const objc = @import("objc");
 const builtin = @import("builtin");
 
 const dispatch = @import("dispatch");
+const CoreFoundation = @import("CoreFoundation");
 const Foundation = @import("Foundation");
 const UIKit = if (builtin.os.tag != .macos) @import("UIKit") else struct {};
 const AppKit = if (builtin.os.tag == .macos) @import("AppKit") else struct {};
@@ -39,11 +40,29 @@ const AppDelegate = opaque {
 
 fn runApp() callconv(.C) void {
     std.debug.print("Hello from the app's main run loop!\n", .{});
-    // typedef CFStringRef CFRunLoopMode;
-    // typedef double CFTimeInterval;
-    // CFRunLoopRef CFRunLoopGetMain(void);
-    // typedef enum CFRunLoopRunResult : SInt32 {}
-    // CFRunLoopRunResult CFRunLoopRunInMode(CFRunLoopMode mode, CFTimeInterval seconds, Boolean returnAfterSourceHandled);
+
+    while (true) {
+        const mode = CoreFoundation.kCFRunLoopDefaultMode;
+        const timeout_seconds = 1.0;
+        switch (CoreFoundation.CFRunLoopRunInMode(mode, timeout_seconds, false)) {
+            .finished => {
+                std.debug.print("Run loop finished (weird, right?)\n", .{});
+                return;
+            },
+            .stopped => {
+                std.debug.print("Run loop was stopped (weird, right?)\n", .{});
+                return;
+            },
+            .timed_out => {
+                std.debug.print("Nothing to do...\n", .{});
+            },
+            .handled_source => continue,
+            _ => |result| {
+                std.debug.print("CFRunLoopRunInMode returned {}, which is weird and shouldn't happen.\n", .{result});
+                return;
+            },
+        }
+    }
 }
 
 fn initDelegate() callconv(.C) void {
@@ -53,7 +72,7 @@ fn initDelegate() callconv(.C) void {
     delegate.setRunFunction(runApp);
 }
 
-pub fn main() void {
+pub fn main() u8 {
     const autoreleasepool = objc.objc_autoreleasePoolPush();
     defer objc.objc_autoreleasePoolPop(autoreleasepool);
 
@@ -63,10 +82,13 @@ pub fn main() void {
         delegate.setRunFunction(runApp);
         app.setDelegate(delegate.asNSApplicationDelegate());
         app.run();
+        return 0;
     } else {
         const main_queue = dispatch.dispatch_get_main_queue();
         dispatch.dispatch_async_f(main_queue, null, initDelegate);
         const delegate_class_name = Foundation.NSString.literalWithUniqueId("AppDelegate", "0");
-        UIKit.UIApplicationMain(std.os.argv.len, std.os.argv.ptr, null, delegate_class_name);
+        const argc: c_int = @bitCast(@as(c_uint, @truncate(std.os.argv.len)));
+        const return_value = UIKit.UIApplicationMain(argc, @ptrCast(std.os.argv.ptr), null, delegate_class_name);
+        return @intCast(return_value & 0xff);
     }
 }

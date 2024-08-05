@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleName</key>
+	<string>MachDemo</string>
+	<key>CFBundleDisplayName</key>
+	<string>Mach Demo</string>
+	<key>CFBundleExecutable</key>
+	<string>MachDemo</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.machengine.objc-demo</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>metal</string>
+	</array>
+	<key>UIStatusBarHidden</key>
+	<true/>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+</dict>
+</plist>

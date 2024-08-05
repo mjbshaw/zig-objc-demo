@@ -5,6 +5,10 @@ const builtin = @import("builtin");
 pub extern "c" fn objc_autoreleasePoolPush() *void;
 pub extern "c" fn objc_autoreleasePoolPop(*void) void;
 
+pub extern "c" fn objc_autorelease(*id) *id; // Same as [object autorelease].
+pub extern "c" fn objc_release(*id) void; // Same as [object release].
+pub extern "c" fn objc_retain(*id) *id; // Same as [object retain].
+
 pub extern "c" fn objc_alloc(class: *Class) ?*id; // Same as [Class alloc].
 pub extern "c" fn objc_alloc_init(class: *Class) ?*id; // Same as [[Class alloc] init].
 pub extern "c" fn objc_opt_new(class: *Class) ?*id; // Same as [Class new].
@@ -153,10 +157,3 @@ pub fn ExternClass(name: anytype) type {
         }
     };
 }
-
-// pub const objc_image_info = asm (
-//     \\    .section __DATA,__objc_imageinfo,regular,no_dead_strip
-//     \\L_OBJC_IMAGE_INFO:
-//     \\    .long 0
-//     \\    .long 64
-// );

@@ -1,7 +1,66 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const objc = @import("objc");
-const NSObject = @import("NSObject.zig").NSObject;
+
+pub const NSObject = opaque {
+    pub const ZigInfo = objc.ExternClass("NSObject");
+
+    /// `+[NSObject alloc]`
+    pub fn alloc() *NSObject {
+        return @ptrCast(objc.objc_alloc(ZigInfo.objcClass()));
+    }
+
+    /// `[[NSObject alloc] init]`
+    pub fn allocInit() *NSObject {
+        return @ptrCast(objc.objc_alloc_init(ZigInfo.objcClass()));
+    }
+
+    /// `-[NSObject init]`
+    pub fn init(self: *NSObject) *NSObject {
+        return objc.msgSend(self, "init", *NSObject, .{});
+    }
+
+    /// `-[NSObject description]`
+    pub fn description(self: *NSObject) *NSString {
+        return objc.msgSend(self, "description", *NSString, .{});
+    }
+
+    /// `-[NSObject debugDescription]`
+    pub fn debugDescription(self: *NSObject) *NSString {
+        return objc.msgSend(self, "debugDescription", *NSString, .{});
+    }
+
+    /// `-[NSObject isEqual:]`
+    pub fn isEqual(self: *NSObject, other: ?*objc.id) bool {
+        return objc.msgSend(self, "isEqual:", objc.BOOL, .{other}) != 0;
+    }
+
+    /// `-[NSObject hash]`
+    pub fn hash(self: *NSObject) usize {
+        return objc.msgSend(self, "hash", usize, .{});
+    }
+
+    /// `-[NSObject isKindOfClass:]`
+    pub fn isKindOfClass(self: *NSObject, class: *objc.Class) bool {
+        return objc.msgSend(self, "isKindOfClass:", objc.BOOL, .{class}) != 0;
+    }
+
+    /// `-[NSObject retain]`
+    pub fn retain(self: *NSObject) *NSObject {
+        return @ptrCast(objc.objc_retain(@ptrCast(self)));
+    }
+
+    /// `-[NSObject release]`
+    pub fn release(self: *NSObject) void {
+        return objc.objc_release(@ptrCast(self));
+    }
+
+    /// `-[NSObject autorelease]`
+    pub fn autorelease(self: *NSObject) *NSObject {
+        return @ptrCast(objc.objc_autorelease(@ptrCast(self)));
+    }
+};
+
 
 fn isAsciiString(comptime str: []const u8) bool {
     for (str) |c| {
