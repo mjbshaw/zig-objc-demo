@@ -23,6 +23,6 @@ pub const kCFRunLoopRunHandledSource = CFRunLoopRunResult.handled_source;
 pub extern const kCFRunLoopCommonModes: CFRunLoopMode;
 pub extern const kCFRunLoopDefaultMode: CFRunLoopMode;
 
-pub extern "c" fn CFRunLoopGetMain() CFRunLoopRef;
+pub extern fn CFRunLoopGetMain() CFRunLoopRef;
 
-pub extern "c" fn CFRunLoopRunInMode(mode: CFRunLoopMode, seconds: CFTimeInterval, return_after_source_handled: bool) CFRunLoopRunResult;
+pub extern fn CFRunLoopRunInMode(mode: CFRunLoopMode, seconds: CFTimeInterval, return_after_source_handled: bool) CFRunLoopRunResult;

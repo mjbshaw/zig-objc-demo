@@ -27,4 +27,4 @@ pub const UIApplication = opaque {
 
 pub const UIApplicationDelegate = opaque {};
 
-pub extern "c" fn UIApplicationMain(argc: c_int, argv: *?*c_char, principal_class_name: ?*Foundation.NSString, delegate_class_name: ?*Foundation.NSString) c_int;
+pub extern fn UIApplicationMain(argc: c_int, argv: *?*c_char, principal_class_name: ?*Foundation.NSString, delegate_class_name: ?*Foundation.NSString) c_int;

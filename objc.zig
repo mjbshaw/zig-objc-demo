@@ -2,23 +2,24 @@ const std = @import("std");
 const builtin = @import("builtin");
 
 // libobjc.dylib
-pub extern "c" fn objc_autoreleasePoolPush() *void;
-pub extern "c" fn objc_autoreleasePoolPop(*void) void;
+const AutoreleasePoolPage = opaque {};
+pub extern "objc" fn objc_autoreleasePoolPush() *AutoreleasePoolPage;
+pub extern "objc" fn objc_autoreleasePoolPop(*AutoreleasePoolPage) void;
 
-pub extern "c" fn objc_autorelease(*id) *id; // Same as [object autorelease].
-pub extern "c" fn objc_release(*id) void; // Same as [object release].
-pub extern "c" fn objc_retain(*id) *id; // Same as [object retain].
+pub extern "objc" fn objc_autorelease(*id) *id; // Same as [object autorelease].
+pub extern "objc" fn objc_release(*id) void; // Same as [object release].
+pub extern "objc" fn objc_retain(*id) *id; // Same as [object retain].
 
-pub extern "c" fn objc_alloc(class: *Class) ?*id; // Same as [Class alloc].
-pub extern "c" fn objc_alloc_init(class: *Class) ?*id; // Same as [[Class alloc] init].
-pub extern "c" fn objc_opt_new(class: *Class) ?*id; // Same as [Class new].
+pub extern "objc" fn objc_alloc(class: *Class) ?*id; // Same as [Class alloc].
+pub extern "objc" fn objc_alloc_init(class: *Class) ?*id; // Same as [[Class alloc] init].
+pub extern "objc" fn objc_opt_new(class: *Class) ?*id; // Same as [Class new].
 
 // libobjc.dylib
-pub extern "c" fn objc_getClass(name: [*:0]const c_char) *Class;
-pub extern "c" fn objc_getProtocol(name: [*:0]const c_char) *Protocol;
-pub extern "c" fn class_addProtocol(class: ?*Class, protocol: *Protocol) BOOL;
-pub extern "c" fn objc_allocateClassPair(superclass: ?*Class, name: [*:0]const c_char, extra_bytes: usize) ?*Class;
-pub extern "c" fn class_addMethod(class: ?*Class, name: SEL, imp: *const anyopaque, types: ?[*:0]const c_char) BOOL;
+pub extern "objc" fn objc_getClass(name: [*:0]const c_char) *Class;
+pub extern "objc" fn objc_getProtocol(name: [*:0]const c_char) *Protocol;
+pub extern "objc" fn class_addProtocol(class: ?*Class, protocol: *Protocol) BOOL;
+pub extern "objc" fn objc_allocateClassPair(superclass: ?*Class, name: [*:0]const c_char, extra_bytes: usize) ?*Class;
+pub extern "objc" fn class_addMethod(class: ?*Class, name: SEL, imp: *const anyopaque, types: ?[*:0]const c_char) BOOL;
 
 pub const SEL = [*:0]const c_char;
 pub const BOOL = u8;
@@ -39,7 +40,7 @@ pub const AvailabilityPlatforms = struct {
 };
 
 // This requires CoreFoundation to be linked on macOS 10.14 and below, iOS/tvOS 12 and below, or watchOS 5 and below. I'm not going to worry about that, though.
-extern "c" fn __isPlatformVersionAtLeast(platform: u32, major: u32, minor: u32, patch: u32) i32;
+extern fn __isPlatformVersionAtLeast(platform: u32, major: u32, minor: u32, patch: u32) i32;
 
 // This is generally equivalent to @available(...).
 pub inline fn available(platforms: AvailabilityPlatforms) bool {

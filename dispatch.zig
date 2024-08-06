@@ -5,4 +5,4 @@ pub inline fn dispatch_get_main_queue() *dispatch_queue_t {
     return &_dispatch_main_q;
 }
 
-pub extern "c" fn dispatch_async_f(queue: *dispatch_queue_t, context: ?*anyopaque, work: *const fn () callconv(.C) void) void;
+pub extern "System" fn dispatch_async_f(queue: *dispatch_queue_t, context: ?*anyopaque, work: *const fn () callconv(.C) void) void;
