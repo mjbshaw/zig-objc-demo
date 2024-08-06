@@ -5,10 +5,12 @@ const std = @import("std");
 // zig build -Dtarget=aarch64-ios-simulator
 // If cross compiling: zig build --sysroot <path_to_sdk> -Dtarget=aarch64-ios-simulator
 // Example: zig build -Dtarget=aarch64-ios-simulator --sysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+// TODO: zig has a bug when building for the iOS simulator. When invoking `ld`, it passes `-platform_version ios` instead of `-platform_version ios-simulator`. Test with zig HEAD and see if it still happens, and if so, fix it. To work around it, pass `--verbose-link` when building and copy the `ld` command and execute it with a corrected `-platform_version` arg. Also note the bad search paths that `ld` warns about.
+// TODO: I think zig has a caching issue when changing targets from macOS to iOS. For example, building for iOS executes a linker command for macOS, and the first attempt at linking for iOS fails.
 
 // Install and run on simulator:
 // xcrun simctl install booted zig-out/bin/MachDemo.app
-// xcrun simctl launch booted MachDemo
+// xcrun simctl launch --console booted org.machengine.objc-demo
 pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
@@ -124,8 +126,8 @@ pub fn build(b: *std.Build) void {
         b.getInstallStep().dependOn(&install_app_plist.step);
     }
 
-    const ams_file = b.addInstallFile(demo.getEmittedAsm(), "demo.s");
-    b.getInstallStep().dependOn(&ams_file.step);
+    // const ams_file = b.addInstallFile(demo.getEmittedAsm(), "demo.s");
+    // b.getInstallStep().dependOn(&ams_file.step);
 }
 
 // Currently we only target:
@@ -150,8 +152,8 @@ pub fn build(b: *std.Build) void {
 // need all these commands in general. I just got tired of trying to remember them.
 //
 // iOS arm64 device: cc -c file.m -o arm64-apple-ios15.s -target arm64-apple-ios15 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
-// iOS arm64 simulator: cc -c file.m -o arm64-apple-ios15-sim.s -target arm64-apple-ios15 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-// iOS x86_64 simulator: cc -c file.m -o x86_64-apple-ios15-sim.s -target x86_64-apple-ios15 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+// iOS arm64 simulator: cc -c file.m -o arm64-apple-ios15-sim.s -target arm64-apple-ios15-simulator -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+// iOS x86_64 simulator: cc -c file.m -o x86_64-apple-ios15-sim.s -target x86_64-apple-ios15-simulator -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
 //
 // macOS arm64: cc -c file.m -o arm64-apple-macos12.s -target arm64-apple-macos12 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 // macOS x86_64: cc -c file.m -o x86_64-apple-macos12.s -target x86_64-apple-macos12 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
@@ -160,13 +162,13 @@ pub fn build(b: *std.Build) void {
 // Mac Catalyst x86_64: cc -c file.m -o x86_64-apple-ios15-macabi.s -target x86_64-apple-ios15-macabi -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/iOSSupport/System/Library/Frameworks
 //
 // visionOS arm64 device: cc -c file.m -o arm64-apple-xros12.s -target arm64-apple-xros12 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS.sdk
-// visionOS arm64 simulator: cc -c file.m -o arm64-apple-xros12-sim.s -target arm64-apple-xros12 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/XRSimulator.platform/Developer/SDKs/XRSimulator.sdk
+// visionOS arm64 simulator: cc -c file.m -o arm64-apple-xros12-sim.s -target arm64-apple-xros12-simulator -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/XRSimulator.platform/Developer/SDKs/XRSimulator.sdk
 //
 // watchOS arm64 device: cc -c file.m -o arm64-apple-watchos8.s -target arm64-apple-watchos8 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk
-// watchOS arm64 simulator: cc -c file.m -o arm64-apple-watchos8-sim.s -target arm64-apple-watchos8 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator.sdk
-// watchOS x86_64 simulator: cc -c file.m -o x86_64-apple-watchos8-sim.s -target x86_64-apple-watchos8 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator.sdk
+// watchOS arm64 simulator: cc -c file.m -o arm64-apple-watchos8-sim.s -target arm64-apple-watchos8-simulator -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator.sdk
+// watchOS x86_64 simulator: cc -c file.m -o x86_64-apple-watchos8-sim.s -target x86_64-apple-watchos8-simulator -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator.sdk
 //
 // tvOS arm64 device: cc -c file.m -o arm64-apple-tvos15.s -target arm64-apple-tvos15 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk
-// tvOS arm64 simulator: cc -c file.m -o arm64-apple-tvos15-sim.s -target arm64-apple-tvos15 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/AppleTVSimulator.platform/Developer/SDKs/AppleTVSimulator.sdk
-// tvOS x86_64 simulator: cc -c file.m -o x86_64-apple-tvos15-sim.s -target x86_64-apple-tvos15 -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/AppleTVSimulator.platform/Developer/SDKs/AppleTVSimulator.sdk
+// tvOS arm64 simulator: cc -c file.m -o arm64-apple-tvos15-sim.s -target arm64-apple-tvos15-simulator -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/AppleTVSimulator.platform/Developer/SDKs/AppleTVSimulator.sdk
+// tvOS x86_64 simulator: cc -c file.m -o x86_64-apple-tvos15-sim.s -target x86_64-apple-tvos15-simulator -S -Os -fomit-frame-pointer -fobjc-arc -fno-objc-exceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/AppleTVSimulator.platform/Developer/SDKs/AppleTVSimulator.sdk
 //
